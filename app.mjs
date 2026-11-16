@@ -13,7 +13,8 @@ const fireworkVisual = globalThis.createFireworkComposition($("firework-visual")
   loop: false,
   interactive: false,
   transparent: true,
-  flowerSize: 0.68,
+  flowerSize: 0.52,
+  onCollision: () => { effects.hits += 1; },
 });
 const frame = document.createElement("canvas");
 const frameContext = frame.getContext("2d");
@@ -34,6 +35,10 @@ function status(message) {
 function cameraUI(label, button, message) {
   $("camera-state").textContent = label;
   $("camera-button-text").textContent = button;
+  cameraButton.dataset.state = label.toLowerCase();
+  cameraButton.setAttribute("aria-pressed", String(label !== "OFF"));
+  cameraButton.setAttribute("aria-busy", String(label === "REQUEST" || label === "STARTING" || label === "LOADING"));
+  cameraButton.title = button;
   if (message) status(message);
 }
 
@@ -171,6 +176,7 @@ function startTracking(current) {
 }
 
 async function startCamera() {
+  if (session) return;
   if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
     status("请在 HTTPS 或 localhost 上使用支持摄像头的浏览器。");
     return;
@@ -193,6 +199,8 @@ async function startCamera() {
     });
     video.srcObject = stream;
     video.hidden = false;
+    video.autoplay = true;
+    cameraUI("STARTING", "取消开启", "摄像头已连接，正在显示画面…");
     await video.play();
     if (session !== current) return;
     stage.classList.add("live");
@@ -217,11 +225,11 @@ function sample(current, now) {
     if (now - current.lastAt > 5000 && current.worker) useMainThread(current);
     return;
   }
-  const minInterval = current.worker ? Math.max(110, (current.ms || 0) * 1.5) : Math.max(200, (current.ms || 0) * 4);
+  const minInterval = current.worker ? Math.max(150, (current.ms || 0) * 1.8) : Math.max(240, (current.ms || 0) * 4.5);
   if (now - current.lastAt < minInterval || current.lastVideoTime === video.currentTime) return;
   current.lastAt = now;
   current.lastVideoTime = video.currentTime;
-  const scale = Math.min(1, 256 / Math.max(video.videoWidth, video.videoHeight));
+  const scale = Math.min(1, 224 / Math.max(video.videoWidth, video.videoHeight));
   const width = Math.max(1, Math.round(video.videoWidth * scale));
   const height = Math.max(1, Math.round(video.videoHeight * scale));
   if (frame.width !== width || frame.height !== height) {
@@ -316,7 +324,11 @@ function render(now) {
   }
 }
 
-cameraButton.addEventListener("click", () => session ? stopCamera() : startCamera());
+cameraButton.addEventListener("click", event => {
+  event.preventDefault();
+  if (session) stopCamera("摄像头启动已取消。可再次点击开启。");
+  else void startCamera();
+});
 $("preview-rain").addEventListener("click", () => {
   fireUntil = 0;
   previewRainUntil = performance.now() + 2300;

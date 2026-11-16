@@ -283,4 +283,31 @@ main { width:min(100vw, 178.5714svh); height:auto; min-height:0; aspect-ratio:12
 
 .host-avatar { background-image:url('./avatars/photo-9.jpg'); }
 .camera-control svg { width:31px; height:24px; }
-.camera-control { min-width:52px; min-height:52px; touch-action:manipulation; cursor:pointer; }
+.camera-control {
+  min-width:52px;
+  min-height:52px;
+  touch-action:manipulation;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background-color .16s ease, color .16s ease, box-shadow .16s ease, transform .12s ease;
+}
+.camera-control:active { transform:scale(.92); }
+.camera-control[data-state="request"],
+.camera-control[data-state="starting"],
+.camera-control[data-state="loading"] {
+  background:#fff;
+  color:#101116;
+  box-shadow:0 0 0 5px rgba(255,255,255,.16);
+}
+.camera-control[data-state="request"] svg,
+.camera-control[data-state="starting"] svg,
+.camera-control[data-state="loading"] svg { animation:camera-pulse .8s ease-in-out infinite alternate; }
+.camera-control[data-state="live"] {
+  background:#fe2c55;
+  color:#fff;
+  box-shadow:0 0 0 5px rgba(254,44,85,.18);
+}
+@keyframes camera-pulse { to { opacity:.46; transform:scale(.88); } }
+@media (prefers-reduced-motion:reduce) {
+  .camera-control[data-state] svg { animation:none; }
+}

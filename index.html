@@ -6,9 +6,9 @@
   <meta name="description" content="微笑下雨，张嘴点亮烟花。一个在浏览器本地运行的直播 AR 特效原型。">
   <meta name="theme-color" content="#101116">
   <title>Live Weather · 表情天气实验室</title>
-  <link rel="stylesheet" href="./style.css?v=14">
-  <script src="./firework-composition.js?v=12"></script>
-  <script type="module" src="./app.mjs?v=34"></script>
+  <link rel="stylesheet" href="./style.css?v=15">
+  <script src="./firework-composition.js?v=13"></script>
+  <script type="module" src="./app.mjs?v=35"></script>
 </head>
 <body>
   <header class="bar">
@@ -23,7 +23,7 @@
     <section class="workspace" aria-label="表情特效体验">
       <div class="viewer">
         <div class="viewer-bar"><span><b class="record-dot"></b>直播间模拟</span><span id="mode-label">模拟预览</span></div>
-        <button class="camera-control" id="camera-toggle" type="button" aria-label="开启或关闭摄像头" title="开启或关闭摄像头"><svg viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.5" y="3" width="20" height="18" rx="4"/><path d="m22 8 7-4v16l-7-4z"/></svg><span id="camera-button-text" class="sr-only">开启摄像头</span></button><script>if(location.protocol==='file:'){document.getElementById('camera-toggle').addEventListener('click',function(){alert('直接打开本地文件时，浏览器可能阻止程序和摄像头。请使用 http://localhost:8766/ 打开直播间，并允许摄像头权限。')})}</script>
+        <button class="camera-control" id="camera-toggle" type="button" data-state="off" aria-label="开启或关闭摄像头" aria-pressed="false" aria-busy="false" title="开启摄像头"><svg viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.5" y="3" width="20" height="18" rx="4"/><path d="m22 8 7-4v16l-7-4z"/></svg><span id="camera-button-text" class="sr-only">开启摄像头</span></button><script>if(location.protocol==='file:'){document.getElementById('camera-toggle').addEventListener('click',function(){alert('直接打开本地文件时，浏览器可能阻止程序和摄像头。请使用 http://localhost:8766/ 打开直播间，并允许摄像头权限。')})}</script>
         <div class="phone">
           <div class="phone-screen">
             <div class="stage" id="stage">
