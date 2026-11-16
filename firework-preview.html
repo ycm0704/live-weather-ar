@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>原视觉烟花 · 分层动效</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #000; }
+    body { display: grid; place-items: center; overflow: hidden; }
+    canvas {
+      display: block;
+      width: min(96vw, calc(96vh * 937 / 1678), 560px);
+      aspect-ratio: 937 / 1678;
+      background: #000;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="fireworks" aria-label="完全使用参考图材质的分层烟花动画，点击可重新播放"></canvas>
+  <script src="./firework-composition.js"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="微笑下雨，张嘴点亮烟花。一个在浏览器本地运行的直播 AR 特效原型。">
+  <meta name="theme-color" content="#101116">
+  <title>Live Weather · 表情天气实验室</title>
+  <link rel="stylesheet" href="./style.css?v=14">
+  <script src="./firework-composition.js?v=12"></script>
+  <script type="module" src="./app.mjs?v=34"></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="brand"><span class="brand-note">♪</span> TikTok <strong>LIVE</strong></div>
+    <span class="pill">TikTok LIVE / AR Demo</span>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="title">
+      <div><h1 id="title">表情天气</h1></div>
+      <p>微笑下雨，持续张嘴放烟花。移动头部可将烟花推开。</p>
+    </section>
+    <section class="workspace" aria-label="表情特效体验">
+      <div class="viewer">
+        <div class="viewer-bar"><span><b class="record-dot"></b>直播间模拟</span><span id="mode-label">模拟预览</span></div>
+        <button class="camera-control" id="camera-toggle" type="button" aria-label="开启或关闭摄像头" title="开启或关闭摄像头"><svg viewBox="0 0 32 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.5" y="3" width="20" height="18" rx="4"/><path d="m22 8 7-4v16l-7-4z"/></svg><span id="camera-button-text" class="sr-only">开启摄像头</span></button><script>if(location.protocol==='file:'){document.getElementById('camera-toggle').addEventListener('click',function(){alert('直接打开本地文件时，浏览器可能阻止程序和摄像头。请使用 http://localhost:8766/ 打开直播间，并允许摄像头权限。')})}</script>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="stage" id="stage">
+              <video id="camera" muted playsinline aria-label="本机摄像头画面" hidden></video>
+              <canvas id="effects" aria-hidden="true"></canvas>
+              <canvas id="firework-visual" aria-hidden="true"></canvas>
+              <div class="start-prompt">Click the camera on the left<br>to start your live</div>
+              <div class="live-overlay" aria-label="模拟直播间">
+                <div class="phone-status" aria-hidden="true"><span>9:41</span><span>▮▮▮　5G　▰</span></div>
+                <div class="live-top">
+                  <span class="host-avatar" aria-hidden="true"></span>
+                  <div class="host-meta"><b>Live Weather</b><span><i>LIVE</i> <span id="room-likes">2,248</span> 个赞</span></div>
+                  <button id="room-follow" class="follow" type="button" aria-pressed="false">＋ 关注</button>
+                  <span class="live-viewers" aria-label="模拟观众数"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 20v-2a7 7 0 0 1 14 0v2Z"/></svg><span id="room-viewers">108</span></span>
+                </div>
+                <div class="live-badges"><span>🔥 人气榜</span><span>表情天气</span></div>
+                <div class="gift-feed" id="room-gifts" aria-live="off"></div>
+                <div class="floating-reactions" id="room-hearts" aria-hidden="true"></div>
+                <div class="live-comments" id="room-comments" aria-live="off"></div>
+                <div class="live-bottom">
+                  <form class="comment-form" id="room-comment-form">
+                    <input class="comment-box" id="room-comment" aria-label="发表评论" placeholder="说点什么…" autocomplete="off" maxlength="60">
+                    <button class="comment-send" type="submit" aria-label="发送评论">↑</button>
+                  </form>
+                  <button class="bottom-icon" id="room-like" type="button" aria-label="点赞" title="点赞"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 5.6a4.9 4.9 0 0 0-7 0L12 7.3l-1.8-1.7a4.9 4.9 0 0 0-7 7L12 21l8.8-8.4a4.9 4.9 0 0 0 0-7Z"/></svg></button>
+                  <button class="bottom-icon gift-button" id="room-gift" type="button" aria-label="送礼物" title="送礼物" aria-controls="room-gift-tray" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v10H4zM3 7h18v4H3zM12 7v14M12 7c-5 0-6-2-5-4 1-2 5 1 5 4Zm0 0c5 0 6-2 5-4-1-2-5 1-5 4Z"/></svg></button>
+                </div>
+                <section class="gift-tray" id="room-gift-tray" aria-label="模拟礼物" hidden>
+                  <div class="gift-tray-header"><b>送出礼物</b><button id="room-gift-close" type="button" aria-label="关闭礼物面板">×</button></div>
+                  <div class="gift-options">
+                    <button data-gift="rose" type="button"><span aria-hidden="true">🌹</span>玫瑰</button>
+                    <button data-gift="cheer" type="button"><span aria-hidden="true">🎉</span>喝彩</button>
+                    <button data-gift="star" type="button"><span aria-hidden="true">🌟</span>星星</button>
+                  </div>
+                </section>
+                <div class="home-indicator" aria-hidden="true"></div>
+              </div>
+              <div class="scene-status"><span id="scene-name">STANDBY</span><span id="scene-detail">等待触发</span></div>
+            </div>
+          </div>
+          <img class="phone-bezel" src="./phone-frame.png" alt="" draggable="false">
+        </div>
+        <div class="viewer-footer"><span id="status" role="status">当前为模拟预览，摄像头关闭。</span><label><input id="show-collider" type="checkbox"> 显示碰撞轮廓</label></div>
+      </div>
+      <aside class="controls" aria-label="控制与数据">
+        <div class="panel">
+          <div class="panel-heading"><span>摄像头</span><span id="camera-state">OFF</span></div>
+          <p>正脸入镜并保持自然表情，待校准完成后再尝试微笑或持续张嘴。</p>
+          
+          <small>仅请求视频。人脸推理在浏览器本机运行。</small>
+        </div>
+        <div class="panel">
+          <div class="panel-heading"><span>特效预览</span></div>
+          <div class="effect-buttons">
+            <button id="preview-rain" type="button"><span class="effect-icon rain-icon" aria-hidden="true">≋</span><span><b>微笑 · 雨幕</b></span><span aria-hidden="true">↗</span></button>
+            <button id="preview-fire" type="button"><span class="effect-icon fire-icon" aria-hidden="true">✦</span><span><b>张嘴 · 烟花</b></span><span aria-hidden="true">↗</span></button>
+          </div>
+        </div>
+        <details class="panel telemetry"><summary>追踪数据</summary><div class="telemetry-content">
+          <div class="panel-heading"><span>追踪数据</span><span id="tracking-state">模拟头部</span></div>
+          <div class="meters">
+            <div><label for="smile">微笑强度</label><output id="smile-value">—</output><meter id="smile" min="0" max="1" value="0"></meter></div>
+            <div><label for="jaw">张口强度</label><output id="jaw-value">—</output><meter id="jaw" min="0" max="1" value="0"></meter></div>
+          </div>
+          <dl><div><dt>渲染 FPS</dt><dd id="fps">—</dd></div><div><dt>推理 ms</dt><dd id="inference">—</dd></div><div><dt>碰撞次数</dt><dd id="hits">0</dd></div></dl>
+          </div></details>
+      </aside>
+    </section>
+    
+  </main>
+</body>
+</html>

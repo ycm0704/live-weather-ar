@@ -1,0 +1,3 @@
+<!doctype html><html><body><pre id="result">loading</pre><iframe id="app" src="./index.html" width="900" height="680"></iframe><script>
+const app=document.querySelector('#app');app.onload=()=>{setTimeout(()=>{app.contentDocument.querySelector('#camera-toggle').click();setTimeout(()=>{let d=app.contentDocument;document.querySelector('#result').textContent=JSON.stringify({state:d.querySelector('#camera-state').textContent,status:d.querySelector('#status').textContent,videoVisible:!d.querySelector('#camera').hidden,videoReady:d.querySelector('#camera').readyState});},8000)},1000)};
+</script></body></html>
