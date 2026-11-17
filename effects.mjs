@@ -25,7 +25,7 @@ const fireworkPatterns = [
     ],
   },
 ];
-const rainColors = ["#dff7ff", "#c9efff", "#b8e9ff", "#a9e2ff", "#d5f4ff", "#bfefff"];
+const rainColors = ["#61d8ff", "#ff527c", "#a864ff", "#70efc2", "#ffd76b", "#ef86ff"];
 const range = (min, max) => min + (max - min) * Math.random();
 const limit = (value, min, max) => Math.max(min, Math.min(max, value));
 const smoothstep = value => {
@@ -157,10 +157,12 @@ export class WeatherEffects {
     const pixels = g.getImageData(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < pixels.data.length; i += 4) {
       const r = pixels.data[i], green = pixels.data[i + 1], b = pixels.data[i + 2];
-      const light = (r * .24 + green * .58 + b * .18) / 255;
-      pixels.data[i] = Math.round(145 + light * 94);
-      pixels.data[i + 1] = Math.round(205 + light * 48);
-      pixels.data[i + 2] = 255;
+      const light = (r * 0.24 + green * 0.58 + b * 0.18) / 255;
+      // Saturated blue body with a cyan-white highlight, matching the glossy
+      // contrast of the firework artwork without washing the whole drop out.
+      pixels.data[i] = Math.round(15 + light * 155);
+      pixels.data[i + 1] = Math.round(92 + light * 122);
+      pixels.data[i + 2] = Math.round(198 + light * 57);
     }
     g.putImageData(pixels, 0, 0);
     return canvas;
@@ -170,12 +172,11 @@ export class WeatherEffects {
     drop.x = range(12, this.width - 12);
     drop.y = scatter ? range(-this.height, this.height * 0.8) : range(-this.height * 0.5, -20);
     drop.color = Math.floor(range(0, rainColors.length));
-    drop.kind = 1;
+    drop.kind = "drop";
     drop.sample = Math.floor(range(0, 6));
-    drop.size = range(1.05, 1.55) * this.unit;
-    drop.speed = range(92, 165) * this.unit;
-    drop.width = range(18, 25) * drop.size;
-    drop.height = range(27, 38) * drop.size;
+    drop.height = range(34, 49) * this.unit;
+    drop.width = drop.height * 0.52;
+    drop.speed = range(94, 154) * this.unit;
     drop.floor = this.height * range(0.88, 0.98);
     drop.fadeIn = scatter ? 1 : 0;
     drop.phase = range(0, TAU);
@@ -281,12 +282,18 @@ export class WeatherEffects {
           drop.fadeIn = Math.min(1, drop.fadeIn + dt * 3);
           const opacity = this.rain * drop.fadeIn;
           ctx.save(); ctx.globalAlpha = opacity;
-          const piece = this.rainPieces.drop[drop.sample];
+          const piece = this.rainPieces[drop.kind][drop.sample];
           ctx.translate(drop.x, drop.y - drop.height / 2);
           // The drop may drift sideways, but its 3D body always remains upright.
           if ((piece.complete && piece.naturalWidth) || piece.width) {
-            ctx.drawImage(piece, -drop.width / 2, -drop.height / 2, drop.width, drop.height);
-          } else ctx.drawImage(this.rainSprites[drop.color][1], -drop.width / 2, -drop.height / 2, drop.width, drop.height);
+            const nativeWidth = piece.naturalWidth || piece.width;
+            const nativeHeight = piece.naturalHeight || piece.height;
+            const nativeRatio = nativeWidth && nativeHeight ? nativeWidth / nativeHeight : drop.width / drop.height;
+            const drawWidth = drop.height * nativeRatio;
+            ctx.drawImage(piece, -drawWidth / 2, -drop.height / 2, drawWidth, drop.height);
+          } else {
+            ctx.drawImage(this.rainSprites[drop.color][1], -drop.width / 2, -drop.height / 2, drop.width, drop.height);
+          }
           ctx.restore();
         }
       }

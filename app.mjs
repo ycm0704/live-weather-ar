@@ -1,5 +1,5 @@
-import { ExpressionGate, projectFace, readFace } from "./expressions.mjs?v=28";
-import { WeatherEffects } from "./effects.mjs?v=30";
+import { ExpressionGate, projectFace, readFace } from "./expressions.mjs?v=31";
+import { WeatherEffects } from "./effects.mjs?v=33";
 import { createTracker } from "./tracker.mjs";
 import { initLiveRoom } from "./live-room.mjs?v=11";
 
@@ -13,7 +13,7 @@ const fireworkVisual = globalThis.createFireworkComposition($("firework-visual")
   loop: false,
   interactive: false,
   transparent: true,
-  flowerSize: 0.52,
+  flowerSize: 1,
   onCollision: () => { effects.hits += 1; },
 });
 const frame = document.createElement("canvas");
@@ -26,7 +26,6 @@ let lastFrame = 0;
 let metricsAt = 0;
 let frames = 0;
 let previewRainUntil = 0;
-let fireUntil = 0;
 
 function status(message) {
   $("status").textContent = message;
@@ -69,7 +68,7 @@ function stopCamera(message = "摄像头已关闭。可继续模拟预览。") {
   fireworkVisual.stop();
   fireworkVisual.setHead(null);
   gate.reset();
-  previewRainUntil = fireUntil = 0;
+  previewRainUntil = 0;
   updateMetrics(0, true);
   wake();
 }
@@ -86,9 +85,8 @@ function target() {
 }
 
 function triggerFire(now) {
-  if (now < fireUntil - 400) return;
+  if (fireworkVisual.isPlaying()) return;
   fireworkVisual.trigger();
-  fireUntil = now + 10600;
   previewRainUntil = 0;
   wake();
 }
@@ -109,7 +107,7 @@ function acceptDetection(current, face, ms, at) {
 function trackingReady(current, engine) {
   current.engine = engine;
   current.ready = true;
-  cameraUI("LIVE", "关闭摄像头", "正脸入镜并保持自然表情，待校准完成后再尝试微笑或持续张嘴。");
+  cameraUI("LIVE", "关闭摄像头", "正脸入镜并保持自然表情，校准后微笑下雨，大笑触发烟花。");
 }
 
 async function useMainThread(current) {
@@ -206,7 +204,7 @@ async function startCamera() {
     stage.classList.add("live");
     effects.clear();
     gate.reset();
-    previewRainUntil = fireUntil = 0;
+    previewRainUntil = 0;
     $("mode-label").textContent = "实时摄像头";
     cameraUI("LOADING", "取消开启", "正在加载本机人脸模型…");
     startTracking(current);
@@ -225,11 +223,11 @@ function sample(current, now) {
     if (now - current.lastAt > 5000 && current.worker) useMainThread(current);
     return;
   }
-  const minInterval = current.worker ? Math.max(150, (current.ms || 0) * 1.8) : Math.max(240, (current.ms || 0) * 4.5);
+  const minInterval = current.worker ? Math.max(120, (current.ms || 0) * 1.45) : Math.max(200, (current.ms || 0) * 4);
   if (now - current.lastAt < minInterval || current.lastVideoTime === video.currentTime) return;
   current.lastAt = now;
   current.lastVideoTime = video.currentTime;
-  const scale = Math.min(1, 224 / Math.max(video.videoWidth, video.videoHeight));
+  const scale = Math.min(1, 192 / Math.max(video.videoWidth, video.videoHeight));
   const width = Math.max(1, Math.round(video.videoWidth * scale));
   const height = Math.max(1, Math.round(video.videoHeight * scale));
   if (frame.width !== width || frame.height !== height) {
@@ -297,7 +295,7 @@ function render(now) {
     }
     sample(session, now);
   }
-  const fire = now < fireUntil;
+  const fire = fireworkVisual.isPlaying();
   const rain = !fire && (now < previewRainUntil || session?.raining);
   stage.classList.toggle("effect-active", Boolean(fire || rain));
   const currentTarget = target();
@@ -330,7 +328,7 @@ cameraButton.addEventListener("click", event => {
   else void startCamera();
 });
 $("preview-rain").addEventListener("click", () => {
-  fireUntil = 0;
+  fireworkVisual.stop();
   previewRainUntil = performance.now() + 2300;
   wake();
 });

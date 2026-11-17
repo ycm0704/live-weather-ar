@@ -2,13 +2,13 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="微笑下雨，张嘴点亮烟花。一个在浏览器本地运行的直播 AR 特效原型。">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="微笑下雨，大笑点亮烟花。一个在浏览器本地运行的直播 AR 特效原型。">
   <meta name="theme-color" content="#101116">
   <title>Live Weather · 表情天气实验室</title>
-  <link rel="stylesheet" href="./style.css?v=15">
-  <script src="./firework-composition.js?v=13"></script>
-  <script type="module" src="./app.mjs?v=35"></script>
+  <link rel="stylesheet" href="./style.css?v=17">
+  <script src="./firework-composition.js?v=32"></script>
+  <script type="module" src="./app.mjs?v=42"></script>
 </head>
 <body>
   <header class="bar">
@@ -18,7 +18,7 @@
   <main>
     <section class="intro" aria-labelledby="title">
       <div><h1 id="title">表情天气</h1></div>
-      <p>微笑下雨，持续张嘴放烟花。移动头部可将烟花推开。</p>
+      <p>微笑下雨，大笑放烟花。移动头部可将烟花推开。</p>
     </section>
     <section class="workspace" aria-label="表情特效体验">
       <div class="viewer">
@@ -30,7 +30,7 @@
               <video id="camera" muted playsinline aria-label="本机摄像头画面" hidden></video>
               <canvas id="effects" aria-hidden="true"></canvas>
               <canvas id="firework-visual" aria-hidden="true"></canvas>
-              <div class="start-prompt">Click the camera on the left<br>to start your live</div>
+              <div class="start-prompt">点击摄像头按钮<br>开启直播互动</div>
               <div class="live-overlay" aria-label="模拟直播间">
                 <div class="phone-status" aria-hidden="true"><span>9:41</span><span>▮▮▮　5G　▰</span></div>
                 <div class="live-top">
@@ -39,7 +39,7 @@
                   <button id="room-follow" class="follow" type="button" aria-pressed="false">＋ 关注</button>
                   <span class="live-viewers" aria-label="模拟观众数"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M5 20v-2a7 7 0 0 1 14 0v2Z"/></svg><span id="room-viewers">108</span></span>
                 </div>
-                <div class="live-badges"><span>🔥 人气榜</span><span>表情天气</span></div>
+                <div class="live-badges"><span>🔥 人气榜</span></div>
                 <div class="gift-feed" id="room-gifts" aria-live="off"></div>
                 <div class="floating-reactions" id="room-hearts" aria-hidden="true"></div>
                 <div class="live-comments" id="room-comments" aria-live="off"></div>
@@ -71,7 +71,7 @@
       <aside class="controls" aria-label="控制与数据">
         <div class="panel">
           <div class="panel-heading"><span>摄像头</span><span id="camera-state">OFF</span></div>
-          <p>正脸入镜并保持自然表情，待校准完成后再尝试微笑或持续张嘴。</p>
+          <p>正脸入镜并保持自然表情，待校准完成后再尝试微笑或大笑。</p>
           
           <small>仅请求视频。人脸推理在浏览器本机运行。</small>
         </div>
@@ -79,7 +79,7 @@
           <div class="panel-heading"><span>特效预览</span></div>
           <div class="effect-buttons">
             <button id="preview-rain" type="button"><span class="effect-icon rain-icon" aria-hidden="true">≋</span><span><b>微笑 · 雨幕</b></span><span aria-hidden="true">↗</span></button>
-            <button id="preview-fire" type="button"><span class="effect-icon fire-icon" aria-hidden="true">✦</span><span><b>张嘴 · 烟花</b></span><span aria-hidden="true">↗</span></button>
+            <button id="preview-fire" type="button"><span class="effect-icon fire-icon" aria-hidden="true">✦</span><span><b>大笑 · 烟花</b></span><span aria-hidden="true">↗</span></button>
           </div>
         </div>
         <details class="panel telemetry"><summary>追踪数据</summary><div class="telemetry-content">

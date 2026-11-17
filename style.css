@@ -274,6 +274,7 @@ main { width:min(100vw, 178.5714svh); height:auto; min-height:0; aspect-ratio:12
 .stage.effect-active .start-prompt { display:none; }
 #firework-visual { mix-blend-mode:normal; opacity:1; }
 .stage.live .start-prompt { display:none; }
+.stage.live .live-overlay::before { background:transparent; }
 .viewer-footer { color:#888; }
 @media(max-width:640px) {
  main { padding:0; }
@@ -308,6 +309,26 @@ main { width:min(100vw, 178.5714svh); height:auto; min-height:0; aspect-ratio:12
   box-shadow:0 0 0 5px rgba(254,44,85,.18);
 }
 @keyframes camera-pulse { to { opacity:.46; transform:scale(.88); } }
+
+/* On a phone the screen itself is the live room, with no device mockup. */
+@media (max-width: 600px) and (orientation: portrait) {
+  html, body { width:100%; height:100%; overflow:hidden; background:#000; }
+  body { display:block; min-height:100dvh; }
+  .bar { display:none; }
+  main, .workspace, .viewer, .phone { display:block; width:100%; max-width:none; height:100dvh; min-height:0; margin:0; padding:0; aspect-ratio:auto; }
+  main { position:relative; container-type:normal; }
+  .phone-screen { position:absolute; inset:0; border-radius:0; }
+  .phone-bezel, .phone-status, .home-indicator { display:none; }
+  .stage { width:100%; height:100%; }
+  .camera-control { position:absolute; z-index:5; top:calc(env(safe-area-inset-top, 0px) + 65px); right:16px; left:auto; width:48px; height:48px; min-width:48px; min-height:48px; background:#15151bcc; }
+  .live-top { top:calc(env(safe-area-inset-top, 0px) + 12px); }
+  .live-badges { top:calc(env(safe-area-inset-top, 0px) + 70px); right:75px; }
+  .scene-status { top:calc(env(safe-area-inset-top, 0px) + 110px); }
+  .live-bottom { bottom:calc(env(safe-area-inset-bottom, 0px) + 12px); }
+  .live-comments { bottom:calc(env(safe-area-inset-bottom, 0px) + 62px); }
+  .viewer-footer { position:absolute; top:auto; bottom:calc(env(safe-area-inset-bottom, 0px) + 55px); left:16px; right:16px; width:auto; min-height:0; color:#fff; text-shadow:0 1px 4px #000; pointer-events:none; }
+  .viewer:has(.stage.live) .viewer-footer { display:none; }
+}
 @media (prefers-reduced-motion:reduce) {
   .camera-control[data-state] svg { animation:none; }
 }

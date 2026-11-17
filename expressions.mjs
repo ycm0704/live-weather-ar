@@ -13,47 +13,50 @@ export class ExpressionGate {
     this.raining = false;
     this.smileSince = null;
     this.mouthOpenSince = null;
+    this.laughSince = null;
     this.mouthOpenLatched = false;
     this.lastBurstAt = -Infinity;
   }
 
   update(smile, jaw, now) {
     if (this.lastAt && now - this.lastAt > 1200) {
-      this.smileSince = this.mouthOpenSince = null;
+      this.smileSince = this.mouthOpenSince = this.laughSince = null;
       this.raining = false;
     }
     this.lastAt = now;
-    this.smile += (smile - this.smile) * 0.48;
-    this.jaw += (jaw - this.jaw) * 0.48;
-    if (this.samples < 7) {
+    this.smile += (smile - this.smile) * 0.62;
+    this.jaw += (jaw - this.jaw) * 0.56;
+    if (this.samples < 3) {
       this.samples++;
       this.baselineSmile += (smile - this.baselineSmile) / this.samples;
       this.baselineJaw += (jaw - this.baselineJaw) / this.samples;
-      return { warming: true, rain: false, burst: false };
+      // A clear smile is allowed to trigger immediately, even if the user was
+      // already smiling when the camera opened. Neutral faces still get three
+      // short samples for baseline calibration.
+      if (smile < 0.15 || jaw > 0.38) {
+        return { warming: true, rain: false, burst: false };
+      }
     }
 
-    const smileThreshold = Math.max(0.11, Math.min(this.baselineSmile, 0.34) + 0.06);
-    // Fireworks are a mouth-open gesture, not a laugh classifier. Keep the
-    // threshold relative to the relaxed jaw and reject one-frame spikes.
-    const mouthOpenThreshold = Math.max(0.42, Math.min(this.baselineJaw, 0.22) + 0.28);
-    const smiling = this.smile >= smileThreshold - (this.raining ? 0.035 : 0)
+    const smileThreshold = Math.max(0.085, Math.min(this.baselineSmile + 0.025, 0.13));
+    const smiling = this.smile >= smileThreshold - (this.raining ? 0.022 : 0.02)
       && (this.raining || smile >= smileThreshold);
-    const mouthOpen = this.jaw >= mouthOpenThreshold && jaw >= mouthOpenThreshold;
+    const laughThreshold = Math.max(0.38, Math.min(0.55, this.baselineSmile + 0.28));
+    const laughing = this.smile >= laughThreshold && smile >= laughThreshold;
 
     this.smileSince = smiling ? this.smileSince ?? now : null;
-    this.mouthOpenSince = mouthOpen ? this.mouthOpenSince ?? now : null;
+    this.laughSince = laughing ? this.laughSince ?? now : null;
 
-    if (this.jaw < mouthOpenThreshold - 0.14 && jaw < mouthOpenThreshold - 0.12) {
+    if (this.smile < laughThreshold - 0.10) {
       this.mouthOpenLatched = false;
     }
-    const burst = this.mouthOpenSince !== null && now - this.mouthOpenSince >= 225
-      && !this.mouthOpenLatched && now - this.lastBurstAt >= 1600;
+    const heldLaugh = this.laughSince !== null && now - this.laughSince >= 300;
+    const burst = heldLaugh && !this.mouthOpenLatched && now - this.lastBurstAt >= 1600;
     if (burst) {
       this.mouthOpenLatched = true;
       this.lastBurstAt = now;
     }
-    this.raining = !mouthOpen && !this.mouthOpenLatched
-      && this.smileSince !== null && now - this.smileSince >= 100;
+    this.raining = !laughing && !this.mouthOpenLatched && this.smileSince !== null;
     return { warming: false, rain: this.raining, burst };
   }
 }
